@@ -112,7 +112,7 @@ class SecurePassword {
     return ($this.RandomChars.alpha + $this.RandomChars.nums + $this.RandomChars.special + $this.RandomChars.alpha.ToLower())
   }
 
-  [bool] ValidateRandom($p) {
+  [bool] ValidateRandom([string] $p) {
     $hasAlphaLow = $false
     $hasAlphaUpper = $false
     $hasNumber = $false
@@ -171,19 +171,19 @@ class SecurePassword {
 }
 
 class Range : System.Collections.ArrayList {
-  Range($Count) : base() {
+  Range([Int32] $Count) : base() {
     $this.build(0, 1, $Count)
   }
 
-  Range($Start, $Count) : base() {
+  Range([Int32] $Start, [Int32] $Count) : base() {
     $this.build($Start, 1, $Count)
   }
 
-  Range($Start, $Step, $Count) : base() {
+  Range([Int32] $Start, [Int32] $Step, [Int32] $Count) : base() {
     $this.build($Start, $Step, $Count)
   }
 
-  hidden [void] build($Start, $Step, $Count) {
+  hidden [void] build([Int32] $Start, [Int32] $Step, [Int32] $Count) {
     for ($i = 0; $i -lt $Count; $i++) {
       $this.Add($Start)
       $Start += $Step
@@ -206,7 +206,7 @@ class SimpleMath {
   }
 }
 
-function Format-Int($Value) {
+function Format-Int([Int32] $Value) {
   [string]$num = $Value
   $ar = $num.toCharArray()
   [array]::Reverse($ar)
@@ -223,7 +223,7 @@ enum PerfUnits {
   Ticks = 4
 }
 
-function Measure-Performance([PerfUnits]$Unit, $Code={}, $Attempts = 1, $Verbose) {
+function Measure-Performance([PerfUnits] $Unit, [scriptblock] $Code={}, [Int32] $Attempts = 1, [bool] $Verbose) {
   $UnitMap = @("TotalMilliseconds", "TotalSeconds", "TotalMinutes", "TotalHours", "Ticks")
 
   $useunit = $UnitMap[$Unit]
@@ -250,7 +250,7 @@ function Measure-Performance([PerfUnits]$Unit, $Code={}, $Attempts = 1, $Verbose
   }
 }
 
-function Get-Xml($File) {
+function Get-Xml([string] $File) {
     [xml]([string](Get-Content $File))
 }
 
