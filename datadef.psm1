@@ -30,13 +30,13 @@
 #
 # Data Usage:
 #
-#         # Load Data from file
-#         $d = $dd.DataDef::FromFile("./data.json")
+#         # Load Data from file with defined schema
+#         $d = $dd.DataDef::FromFile($s, "./data.json")
 #
 #         # OR
 #
-#         # Load from JSON text in a variable
-#         $d = $dd.DataDef::FromJson($jsonText)
+#         # Load from JSON text in a variable with defined schema
+#         $d = $dd.DataDef::FromJson($s, $jsonText)
 #
 #         # OR
 #
@@ -71,11 +71,11 @@ class DataDefSchema {
         "Boolean" = "boolean"
     }
 
-    [bool] ValidateType($t) {
+    [bool] ValidateType([string] $t) {
         return ($t -in $this.Types.Values)        
     }
 
-    [bool] ValidateField($f,$v) {
+    [bool] ValidateField([string] $f, [string] $v) {
         if (-not ($f -in $this.Schema.Keys)) {
             throw "Field not found in schema ($f)"
         }
@@ -89,7 +89,7 @@ class DataDefSchema {
         return ($this.Schema[$f] -eq $this.Types[$dataType])
     }
     
-    [void] AddField($f,$t) {
+    [void] AddField([string] $f, [string] $t) {
         if (-not $this.ValidateType($t)) {
             throw "Invalid field type ($t)"
         }
@@ -105,7 +105,7 @@ class DataDefSchema {
         return ($this.Schema | ConvertTo-Json)
     }
 
-    static [DataDefSchema] FromJson($j) {
+    static [DataDefSchema] FromJson([string] $j) {
         $ob = [DataDefSchema]::new()
 
         $s = $j | ConvertFrom-Json
@@ -120,7 +120,7 @@ class DataDefSchema {
         return $ob
     }
 
-    static [DataDefSchema] FromFile($p) {
+    static [DataDefSchema] FromFile([string] $p) {
         $jsonText = (Get-Content $p)
 
         return ([DataDefSchema]::FromJson($jsonText))
@@ -165,7 +165,7 @@ class DataDef {
         $this.Data.Add($r)
     }
 
-    [DataDef] Equal($f,$v) {
+    [DataDef] Equal([string] $f, [string] $v) {
         $this.Schema.ValidateField($f,$v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -eq $v}
@@ -173,7 +173,7 @@ class DataDef {
         return ([DataDef]::new($this.Schema,$qdata))
     }
 
-    [DataDef] Match($f,$v) {
+    [DataDef] Match([string] $f, [string] $v) {
         $this.Schema.ValidateField($f,$v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -match $v}
@@ -181,7 +181,7 @@ class DataDef {
         return ([DataDef]::new($this.Schema,$qdata))
     }
 
-    [DataDef] GreaterThan($f,$v) {
+    [DataDef] GreaterThan([string] $f, [string] $v) {
         $this.Schema.ValidateField($f,$v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -gt $v}
@@ -189,7 +189,7 @@ class DataDef {
         return ([DataDef]::new($this.Schema,$qdata))
     }
 
-    [DataDef] GreaterThanOrEqual($f,$v) {
+    [DataDef] GreaterThanOrEqual([string] $f, [string] $v) {
         $this.Schema.ValidateField($f,$v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -ge $v}
@@ -198,14 +198,14 @@ class DataDef {
     }
 
     [DataDef] LessThan($f,$v) {
-        $this.Schema.ValidateField($f,$v)
+        $this.Schema.ValidateField([string] $f, [string] $v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -lt $v}
         
         return ([DataDef]::new($this.Schema,$qdata))
     }
 
-    [DataDef] LessThanOrEqual($f,$v) {
+    [DataDef] LessThanOrEqual([string] $f, [string] $v) {
         $this.Schema.ValidateField($f,$v)
 
         $qdata = $this.Data | Where-Object { $_."$f" -le $v}
@@ -217,7 +217,7 @@ class DataDef {
         return ($this.Data | ConvertTo-Json)
     }
 
-    static [DataDef] FromJson([DataDefSchema]$s,$j) {
+    static [DataDef] FromJson([DataDefSchema]$s,[string] $j) {
         $ob = [DataDef]::new($s)
 
         $rdata = (Get-Content $j | ConvertFrom-Json)
@@ -241,10 +241,10 @@ class DataDef {
         return $ob
     }
 
-    static [DataDef] FromFile($p) {
+    static [DataDef] FromFile([DataDefSchema] $s, [string] $p) {
         $jsonText = (Get-Content $p)
 
-        return ([DataDef]::FromJson($jsonText))
+        return ([DataDef]::FromJson($s, $jsonText))
     }
 }
 
